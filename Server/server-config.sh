@@ -129,6 +129,9 @@ else
   echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
   echo 'ChallengeResponseAuthentication no' >> /etc/ssh/sshd_config
 fi
+# set shorter tunnel timeouts
+echo 'ClientAliveInterval 10' >> /etc/ssh/sshd_config
+echo 'ClientAliveCountMax 3' >> /etc/ssh/sshd_config
 
 ## setup local firewall
 if [[ -z ${IN_DOCKER} ]]; then
