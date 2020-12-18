@@ -196,7 +196,7 @@ fi
 
 # if main launchd is not running, let's check perms and start it
 weLaunched=`launchctl list | grep com.solarwindsmsp.bluesky | wc -l`
-if [ ${weLaunched:-0} -lt 3 ]; then
+if [ ${weLaunched:-0} -lt 4 ]; then
   logMe "LaunchDaemons don't appear to be loaded.  Fixing."
   if [ ! -e /Library/LaunchDaemons/com.solarwindsmsp.bluesky.plist ]; then
     cp /var/bluesky/com.solarwindsmsp.bluesky.plist /Library/LaunchDaemons/com.solarwindsmsp.bluesky.plist
@@ -206,6 +206,9 @@ if [ ${weLaunched:-0} -lt 3 ]; then
   fi
   if [ ! -e /Library/LaunchDaemons/com.solarwindsmsp.bluesky.reconnect.plist ]; then
     cp /var/bluesky/com.solarwindsmsp.bluesky.reconnect.plist /Library/LaunchDaemons/com.solarwindsmsp.bluesky.reconnect.plist
+  fi
+  if [ ! -e /Library/LaunchDaemons/com.solarwindsmsp.bluesky.sleepwatcher.plist ]; then
+    cp /var/bluesky/com.solarwindsmsp.bluesky.sleepwatcher.plist /Library/LaunchDaemons/com.solarwindsmsp.bluesky.sleepwatcher.plist
   fi
   chmod 644 /Library/LaunchDaemons/com.solarwindsmsp.bluesky.*
   chown root:wheel /Library/LaunchDaemons/com.solarwindsmsp.bluesky.*

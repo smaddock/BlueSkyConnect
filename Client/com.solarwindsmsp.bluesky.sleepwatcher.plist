@@ -6,16 +6,16 @@
 		<key>Disabled</key>
 		<false/>
 		<key>Label</key>
-		<string>com.solarwindsmsp.bluesky.reconnect</string>
+		<string>com.solarwindsmsp.bluesky.sleepwatcher</string>
 		<key>ProgramArguments</key>
 		<array>
-			<string>/var/bluesky/reconnect.sh</string>
-		</array>
-		<key>WatchPaths</key>
-		<array>
-			<string>/private/var/db/dhcpclient/leases</string>
+      <string>/var/bluesky/sleepwatcher</string>
+      <string>-w</string>
+      <string>/var/bluesky/reconnect.sh wake</string>
 		</array>
 		<key>RunAtLoad</key>
-		<false/>
+		<true/>
+    <key>KeepAlive</key>
+    <true/>
 </dict>
 </plist>

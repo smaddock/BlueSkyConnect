@@ -21,9 +21,12 @@ function logMe {
   fi
 }
 
-#logMe "Network change detected, waiting..."
-#sleep 5
-logMe "Reloading bluesky service..."
+if [ "$1" == "wake" ]; then
+  logMe "System wake detected, Reloading bluesky service..."
+else
+  logMe "Network state change detected, Reloading bluesky service..."
+fi
+sleep 3
 launchctl unload /Library/LaunchDaemons/com.solarwindsmsp.bluesky.plist
 launchctl load -w /Library/LaunchDaemons/com.solarwindsmsp.bluesky.plist
 
