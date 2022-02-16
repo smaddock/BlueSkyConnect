@@ -128,7 +128,7 @@ chown -R bluesky "$ourHome"
 #help me help you.  help me... help you.
 dseditgroup -o edit -a bluesky -t user com.apple.access_ssh 2> /dev/null
 systemsetup -setremotelogin on &> /dev/null
-if [ ${osVersionMajor:-10} -eq 10 && ${osVersionMinor} -lt 15 ]; then
+if [ ${osVersionMajor:-10} -eq 10 ] && [ ${osVersionMinor} -lt 15 ]; then
   systemsetup -setremotelogin on &> /dev/null
 else
   launchctl load -w /System/Library/LaunchDaemons/ssh.plist
