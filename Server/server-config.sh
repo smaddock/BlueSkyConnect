@@ -118,7 +118,7 @@ echo "$serverFQDN" > /usr/local/bin/BlueSkyConnect/Admin\ Tools/server.txt
 
 ## reconfigure sshd_config to meet our specifications
 echo 'Ciphers chacha20-poly1305@openssh.com,aes256-ctr' >> /etc/ssh/sshd_config
-echo 'MACs hmac-sha2-512-etm@openssh.com,hmac-ripemd160' >> /etc/ssh/sshd_config
+echo 'MACs hmac-sha2-512-etm@openssh.com' >> /etc/ssh/sshd_config
 sed -i '/HostKey \/etc\/ssh\/ssh_host_dsa_key/d' /etc/ssh/sshd_config
 sed -i '/HostKey \/etc\/ssh\/ssh_host_ecdsa_key/d' /etc/ssh/sshd_config
 if [[ -z ${IN_DOCKER} ]]; then
