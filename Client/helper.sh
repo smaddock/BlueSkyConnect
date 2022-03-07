@@ -111,11 +111,10 @@ if [ "$userCheck" == "" ]; then
 
     dscl . -create /Users/bluesky UserShell /bin/bash
     dscl . -create /Users/bluesky PrimaryGroupID 20
+    dscl . -create /Users/bluesky IsHidden 1
     dscl . -create /Users/bluesky NFSHomeDirectory "$ourHome"
     dscl . -create /Users/bluesky RealName "BlueSky"
     dscl . -create /Users/bluesky Password "*"
-    defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList -array-add bluesky
-    defaults write /Library/Preferences/com.apple.loginwindow Hide500Users -bool TRUE
     dseditgroup -o edit -a bluesky -t user com.apple.access_ssh 2> /dev/null
     # kill any autossh and shells that may have belonged to the old user
     killShells
@@ -146,7 +145,6 @@ fi
 if [ "$helpWithWhat" == "fixPerms" ]; then
     logMe "Fixing permissions on our directory"
     chown -R bluesky "$ourHome"
-    defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList -array-add bluesky
 fi
 
 #GSS API config lines mess up client connections in 10.12+
