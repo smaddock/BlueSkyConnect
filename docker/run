@@ -33,7 +33,7 @@ do
 done
 
 # run bluesky server config
-/usr/local/bin/BlueSky/Server/server-config.sh
+/usr/local/bin/BlueSkyConnect/Server/server-config.sh
 
 # purge hanging sockets/pids
 rm -f /var/run/fail2ban/*
@@ -48,7 +48,7 @@ chmod +r /certs/blueskyclient.key
 
 # set default bluesky user
 if [[ ! -z ${DEFAULT_USER} ]]; then
-	echo "${DEFAULT_USER}" > /usr/local/bin/BlueSky/Server/defaultLogin.txt
+	echo "${DEFAULT_USER}" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
 fi
 
 # start it up

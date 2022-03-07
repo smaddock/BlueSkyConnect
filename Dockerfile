@@ -35,12 +35,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir /usr/local/bin/BlueSky /var/run/sshd  /var/run/fail2ban
+RUN mkdir /usr/local/bin/BlueSkyConnect /var/run/sshd  /var/run/fail2ban
 
-COPY . /usr/local/bin/BlueSky/
+COPY . /usr/local/bin/BlueSkyConnect/
 
-RUN mv /usr/local/bin/BlueSky/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf && \
-	mv /usr/local/bin/BlueSky/docker/* /usr/local/bin/ && \
+RUN mv /usr/local/bin/BlueSkyConnect/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf && \
+	mv /usr/local/bin/BlueSkyConnect/docker/* /usr/local/bin/ && \
 	touch /var/log/auth.log /etc/default/locale && \
 	chown syslog:adm /var/log/auth.log && \
 	chmod 640 /var/log/auth.log && \

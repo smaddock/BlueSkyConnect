@@ -15,9 +15,9 @@ rm -rf /tmp/pkg-payload/.* 2>/dev/null
 rm -rf /tmp/pkg/BlueSkyAdmin-*.pkg
 
 # copy the files we want to go into the pkg
-cp -RL /usr/local/bin/BlueSky/Admin\ Tools/*.app /tmp/pkg-payload/
-cp -L /usr/local/bin/BlueSky/Admin\ Tools/server.txt /tmp/pkg-payload/
-cp -L /usr/local/bin/BlueSky/Admin\ Tools/blueskyadmin.pub /tmp/pkg-payload/
+cp -RL /usr/local/bin/BlueSkyConnect/Admin\ Tools/*.app /tmp/pkg-payload/
+cp -L /usr/local/bin/BlueSkyConnect/Admin\ Tools/server.txt /tmp/pkg-payload/
+cp -L /usr/local/bin/BlueSkyConnect/Admin\ Tools/blueskyadmin.pub /tmp/pkg-payload/
 
 # fix up the admin tools for deployment
 cp /tmp/pkg-payload/server.txt /tmp/pkg-payload/BlueSky\ Admin\ Setup.app/Contents/Resources/
@@ -25,7 +25,7 @@ cp /tmp/pkg-payload/server.txt /tmp/pkg-payload/BlueSky\ Admin.app/Contents/Reso
 cp /tmp/pkg-payload/server.txt /tmp/pkg-payload/BlueSky\ Temporary\ Client.app/Contents/Resources/
 cp /tmp/pkg-payload/blueskyadmin.pub /tmp/pkg-payload/BlueSky\ Admin\ Setup.app/Contents/Resources/
 cp /tmp/pkg-payload/blueskyadmin.pub /tmp/pkg-payload/BlueSky\ Admin.app/Contents/Resources/
-cp -L /usr/local/bin/BlueSky/Client/blueskyclient.pub /tmp/pkg-payload/BlueSky\ Temporary\ Client.app/Contents/Resources/
+cp -L /usr/local/bin/BlueSkyConnect/Client/blueskyclient.pub /tmp/pkg-payload/BlueSky\ Temporary\ Client.app/Contents/Resources/
 rm /tmp/pkg-payload/server.txt /tmp/pkg-payload/blueskyadmin.pub
 
 # get info about our payload
