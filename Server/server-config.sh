@@ -121,10 +121,9 @@ echo 'Ciphers chacha20-poly1305@openssh.com,aes256-ctr' >> /etc/ssh/sshd_config
 echo 'MACs hmac-sha2-512-etm@openssh.com' >> /etc/ssh/sshd_config
 sed -i '/HostKey \/etc\/ssh\/ssh_host_dsa_key/d' /etc/ssh/sshd_config
 sed -i '/HostKey \/etc\/ssh\/ssh_host_ecdsa_key/d' /etc/ssh/sshd_config
-if [[ -z ${IN_DOCKER} ]]; then
-  sed -i 's/#Port 22/Port 3122/g' /etc/ssh/sshd_config
-  service sshd restart
-else
+sed -i 's/#Port 22/Port 3122/g' /etc/ssh/sshd_config
+service sshd restart
+if [[ ${IN_DOCKER} ]]; then
   # disable password authentication for ssh in docker
   echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
   echo 'ChallengeResponseAuthentication no' >> /etc/ssh/sshd_config

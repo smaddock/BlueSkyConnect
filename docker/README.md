@@ -104,7 +104,7 @@ docker run -d --name bluesky \
   --cap-add=NET_ADMIN \
   -p 80:80 \
   -p 443:443 \
-  -p 3122:22 \
+  -p 3122:3122 \
   sphen/bluesky
 ```
 

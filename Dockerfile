@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 ENV IN_DOCKER=1 \
     USE_HTTP=0 \
@@ -9,6 +9,7 @@ ENV IN_DOCKER=1 \
     EMAILALERT=root@localhost \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive \
     BLUESKY_VERSION=2.3.2
 
 RUN apt-get update && \
@@ -38,6 +39,9 @@ RUN apt-get update && \
 RUN mkdir /usr/local/bin/BlueSkyConnect /var/run/sshd  /var/run/fail2ban
 
 COPY . /usr/local/bin/BlueSkyConnect/
+
+RUN dpkg -i /usr/local/bin/BlueSkyConnect/docker/libssl1.0.0_1.0.2n-1ubuntu5.8_amd64.deb && \
+  rm /usr/local/bin/BlueSkyConnect/docker/libssl1.0.0_1.0.2n-1ubuntu5.8_amd64.deb
 
 RUN mv /usr/local/bin/BlueSkyConnect/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf && \
 	mv /usr/local/bin/BlueSkyConnect/docker/* /usr/local/bin/ && \
