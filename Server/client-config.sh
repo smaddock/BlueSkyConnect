@@ -116,8 +116,8 @@ if [ "$reKey" == "" ]; then
 	echo command=\"/var/bluesky/.ssh/wrapper.sh\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty `cat /usr/local/bin/BlueSkyConnect/Server/blueskyd.pub` > /usr/local/bin/BlueSkyConnect/Client/.ssh/authorized_keys
 
 	# create server.plist
-	hostKey=`ssh-keyscan -t ed25519 -p 3122 "$hostName" | awk '{ print $2,$3 }'`
-	hostKeyRSA=`ssh-keyscan -t rsa -p 3122 "$hostName" | awk '{ print $2,$3 }'`
+	hostKey=`ssh-keyscan -t ed25519 -p 3122 localhost | awk '{ print $2,$3 }'`
+	hostKeyRSA=`ssh-keyscan -t rsa -p 3122 localhost | awk '{ print $2,$3 }'`
 	ipAddress=`curl -s http://ipinfo.io/ip`
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
