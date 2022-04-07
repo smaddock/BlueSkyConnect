@@ -1,27 +1,28 @@
 #!/bin/bash
 
-# wait for database
-if [[ ${MYSQLROOTPASS} ]]; then
-	mysqlRootPass=$MYSQLROOTPASS
+# set mysql admin password
+if [[ $MYSQLROOTPASS ]]; then
+  mysqlRootPass=$MYSQLROOTPASS
 else
 	# lets check for the linked containers password
-	if [[ ${DB_ENV_MYSQL_ROOT_PASSWORD} ]]; then
+	if [[ $DB_ENV_MYSQL_ROOT_PASSWORD ]]; then
 		mysqlRootPass=$DB_ENV_MYSQL_ROOT_PASSWORD
 	else
 		mysqlRootPass="admin"
 	fi
 fi
 
+# wait for database
 COUNT=0
 while [ $COUNT -le 30 ]
 do
 	sleep 1;
 	COUNT=$((COUNT+1));
 
-  MYSQL_IS_RUNNING=`mysqladmin -h db -u root -p"${mysqlRootPass}" status 2>1 /dev/null | grep Uptime`
+  MYSQL_IS_RUNNING=$(mysqladmin -h db -u root -p'$mysqlRootPass' status 2>1 /dev/null | grep Uptime)
 
-  if [[ -z ${MYSQL_IS_RUNNING} ]]; then
-    if [ $COUNT -gt 30 ]; then
+  if [[ -z $MYSQL_IS_RUNNING ]]; then
+    if [ $COUNT -gt 60 ]; then
       echo "We failed to connect to the database, exiting..."
       exit 1;
     fi
@@ -47,8 +48,8 @@ chmod +r /certs/blueskyadmin.key
 chmod +r /certs/blueskyclient.key
 
 # set default bluesky user
-if [[ ! -z ${DEFAULT_USER} ]]; then
-	echo "${DEFAULT_USER}" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
+if [[ ! -z $DEFAULT_USER ]]; then
+	echo "$DEFAULT_USER" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
 fi
 
 # start it up

@@ -72,6 +72,7 @@ docker run -d --name bluesky \
   --link bluesky_db:db \
   -e SERVERFQDN=bluesky.example.com \
   -e WEBADMINPASS=admin \
+  -e MYSQLROOTPASS=admin \
   -e EMAILALERT=email@example.com \
   -e SMTP_SERVER=smtp.office365.com:587 \
   -e SMTP_AUTH=email@example.com \
