@@ -66,6 +66,7 @@ if [ "$reKey" != "--admin" ]; then
 	# make blueskyclient pair - used for encrypting uploaded SSH keys to the server for clients
 	if [[ -z ${IN_DOCKER} ]]; then
 		openssl req -x509 -nodes -days 100000 -newkey rsa:2048 -keyout /usr/local/bin/BlueSkyConnect/Server/blueskyclient.key -out /usr/local/bin/BlueSkyConnect/Client/blueskyclient.pub -subj '/'
+		chown www-data /usr/local/bin/BlueSkyConnect/Server/blueskyclient.key
 	else
 		# in docker: check to see if we are given existing key - create new one if not
 		if [ ! -e /certs/blueskyclient.key ] || [ ! -e /certs/blueskyclient.pub ]; then
@@ -82,6 +83,7 @@ if [ "$reKey" != "--client" ]; then
 	# make blueskyadmin pair - used for encrypting uploaded SSH keys to the server for admins
 	if [[ -z ${IN_DOCKER} ]]; then
 		openssl req -x509 -nodes -days 100000 -newkey rsa:2048 -keyout /usr/local/bin/BlueSkyConnect/Server/blueskyadmin.key -out /usr/local/bin/BlueSkyConnect/Admin\ Tools/blueskyadmin.pub -subj '/'
+		chown www-data /usr/local/bin/BlueSkyConnect/Server/blueskyadmin.key
 	else
 		# in docker: check to see if we are given existing key - create new one if not
 		if [ ! -e /certs/blueskyadmin.key ] || [ ! -e /certs/blueskyadmin.pub ]; then
