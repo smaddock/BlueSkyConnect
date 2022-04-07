@@ -21,7 +21,7 @@
 ## TODO - ensure this is run by root
 
 ## get variables
-serverFQDN=`cat /usr/local/bin/BlueSky/Server/server.txt`
+serverFQDN=`cat /usr/local/bin/BlueSkyConnect/Server/server.txt`
 mysqlRootPass=`grep password /var/local/my.cnf | awk '{ print $NF }'`
 ## TODO test this
 mysqlCollectorPass=`grep localhost /usr/lib/cgi-bin/collector.php | head -n 1 | awk '{ print $5 }' | tr -d ,\'`
@@ -37,7 +37,7 @@ if [ "$mysqlRootPass" == "" ]; then
 fi
 
 # do the pull
-cd /usr/local/bin/BlueSky
+cd /usr/local/bin/BlueSkyConnect
 git fetch
 git reset --hard origin/master
 
@@ -57,15 +57,15 @@ fi
 sed -i "s/CHANGETHIS/$mysqlCollectorPass/g" /usr/lib/cgi-bin/collector.php
 
 ## double-check permissions on uploaded BlueSky files
-chown -R root:root /usr/local/bin/BlueSky/Server
-chmod 755 /usr/local/bin/BlueSky/Server
-chown www-data /usr/local/bin/BlueSky/Server/keymaster.sh
-chown www-data /usr/local/bin/BlueSky/Server/processor.sh
-chmod 755 /usr/local/bin/BlueSky/Server/*.sh
-chown -R www-data /usr/local/bin/BlueSky/Server/html
-chown www-data /usr/local/bin/BlueSky/Server/collector.php
-chmod 700 /usr/local/bin/BlueSky/Server/collector.php
-chown www-data /usr/local/bin/BlueSky/Server/blueskyd
+chown -R root:root /usr/local/bin/BlueSkyConnect/Server
+chmod 755 /usr/local/bin/BlueSkyConnect/Server
+chown www-data /usr/local/bin/BlueSkyConnect/Server/keymaster.sh
+chown www-data /usr/local/bin/BlueSkyConnect/Server/processor.sh
+chmod 755 /usr/local/bin/BlueSkyConnect/Server/*.sh
+chown -R www-data /usr/local/bin/BlueSkyConnect/Server/html
+chown www-data /usr/local/bin/BlueSkyConnect/Server/collector.php
+chmod 700 /usr/local/bin/BlueSkyConnect/Server/collector.php
+chown www-data /usr/local/bin/BlueSkyConnect/Server/blueskyd
 
 # sets auth.log so admin can read it
 chgrp admin /var/log/auth.log
@@ -130,25 +130,25 @@ if [ $remakePlist -eq 1 ]; then
     <key>serverkeyrsa</key>
     <string>[$serverFQDN]:3122,[$ipAddress]:3122 $hostKeyRSA</string>
 </dict>
-</plist>" > /usr/local/bin/BlueSky/Client/server.plist
+</plist>" > /usr/local/bin/BlueSkyConnect/Client/server.plist
 fi
 
 ## get emailAlertAddress from mysql
 myQry="select defaultemail from global"
 emailAlertAddress=`$myCmd "$myQry"`
 
-## setup credentials in /usr/local/bin/BlueSky/Server/html/config.php
-sed -i "s/MYSQLROOT/$mysqlRootPass/g" /usr/local/bin/BlueSky/Server/html/config.php
+## setup credentials in /usr/local/bin/BlueSkyConnect/Server/html/config.php
+sed -i "s/MYSQLROOT/$mysqlRootPass/g" /usr/local/bin/BlueSkyConnect/Server/html/config.php
 
 ## fail2ban conf - not making these active but updating our copies
-sed -i "s/SERVERFQDN/$serverFQDN/g" /usr/local/bin/BlueSky/Server/sendEmail-whois-lines.conf
-sed -i "s/EMAILADDRESS/$emailAlertAddress/g" /usr/local/bin/BlueSky/Server/jail.local
+sed -i "s/SERVERFQDN/$serverFQDN/g" /usr/local/bin/BlueSkyConnect/Server/sendEmail-whois-lines.conf
+sed -i "s/EMAILADDRESS/$emailAlertAddress/g" /usr/local/bin/BlueSkyConnect/Server/jail.local
 
 ## update emailHelper-dist.  You still need to enable it.
-sed -i "s/EMAILADDRESS/$emailAlertAddress/g" /usr/local/bin/BlueSky/Server/emailHelper-dist.sh
+sed -i "s/EMAILADDRESS/$emailAlertAddress/g" /usr/local/bin/BlueSkyConnect/Server/emailHelper-dist.sh
 
 ## put server fqdn into client config.disabled for proxy routing
-sed -i "s/SERVER/$serverFQDN/g" /usr/local/bin/BlueSky/Client/.ssh/config.disabled
+sed -i "s/SERVER/$serverFQDN/g" /usr/local/bin/BlueSkyConnect/Client/.ssh/config.disabled
 
 ## That's all folks!
 echo "All set.  You're up to date!"

@@ -17,8 +17,8 @@ rm -rf /tmp/pkg-scripts/*
 rm -rf /tmp/pkg/BlueSky-*.pkg
 
 # copy the files we want to go into the pkg and get info about them
-cp -RL /usr/local/bin/BlueSky/Client/* /tmp/pkg-payload/
-cp -R /usr/local/bin/BlueSky/Client/.ssh /tmp/pkg-payload/
+cp -RL /usr/local/bin/BlueSkyConnect/Client/* /tmp/pkg-payload/
+cp -R /usr/local/bin/BlueSkyConnect/Client/.ssh /tmp/pkg-payload/
 NUM_FILES=$(find /tmp/pkg-payload | wc -l)
 INSTALL_KB_SIZE=$(du -k -s /tmp/pkg-payload | awk '{print $1}')
 
