@@ -52,5 +52,15 @@ if [[ ! -z $DEFAULT_USER ]]; then
 	echo "$DEFAULT_USER" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
 fi
 
+# migrate ssh wrapper path for existing keys
+if [ ! -e /home/admin/.ssh/.authorized_keys_migrated ]; then
+  sed -i "s/bin\/BlueSky\/Server/bin\/BlueSkyConnect\/Server/g" /home/admin/.ssh/authorized_keys
+  touch /home/admin/.ssh/.authorized_keys_migrated
+fi
+if [ ! -e /home/bluesky/.ssh/.authorized_keys_migrated ]; then
+  sed -i "s/bin\/BlueSky\/Server/bin\/BlueSkyConnect\/Server/g" /home/bluesky/.ssh/authorized_keys
+  touch /home/bluesky/.ssh/.authorized_keys_migrated
+fi
+
 # start it up
 exec supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
