@@ -333,7 +333,7 @@ fi
 
 # set cacert for older OS
 cacert=""
-if [ ${osVersionMajor:-0} -eq 10 ] && [ ${osVersionMinor:-0} -lt 14 ]; then
+if [ ${osVersionMajor:-0} -eq 10 ] && [ ${osVersionMinor:-0} -lt 15 ]; then
   cacert="--cacert $ourHome/cacert.pem"
 fi
 
