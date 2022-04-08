@@ -32,7 +32,8 @@ RUN apt-get update && \
     fail2ban \
     iptables \
     uuid-runtime \
-    libnet-ssleay-perl && \
+    libnet-ssleay-perl \
+    ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

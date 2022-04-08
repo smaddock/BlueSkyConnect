@@ -55,6 +55,10 @@ if [[ ${IN_DOCKER} ]]; then
 	/usr/sbin/sshd
 fi
 
+# update cacerts for our clients
+echo "Updating cacert.pem..."
+curl -o /usr/local/bin/BlueSkyConnect/Client/cacert.pem https://curl.se/ca/cacert.pem
+
 # safety check if these files are there - ignore if in docker
 if [ -e /usr/local/bin/BlueSkyConnect/Server/blueskyd ] && [ "$reKey" == "" ] && [[ -z ${IN_DOCKER} ]]; then
 	echo "This server has already been configured.  Please use --client or --admin to re-key the client apps."
