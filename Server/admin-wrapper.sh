@@ -30,6 +30,14 @@ sourceIP=`tail /var/log/auth.log | grep 'for admin' | tail -n 1 | awk -F 'for ad
 #fingerPrint=`ssh-keygen -l -f /home/$targetLoc/newkeys/$tmpFile | awk '{ print $2 }' | cut -d : -f 2`
 
 
+function closeAudit {
+	# closes the previous mysql record with an exit code and finish time
+	# $1 should be exit code
+	endTime=`date '+%Y-%m-%d %H:%M:%S %Z'`
+	myQry="update connections set endTime='$endTime',exitStatus='$1' where id='$auditID'"
+	$myCmd "$myQry"
+}
+
 function writeAudit {
 	# creates a record in mysql for tracking admin activity
 	# $1 should be error description, if any
@@ -37,14 +45,6 @@ function writeAudit {
 	$myCmd "$myQry"
     myQry="select id from connections where startTime='$startTime' and adminkey='$keyUsed'"
 	auditID=`$myCmd "$myQry"`
-}
-
-function closeAudit {
-	# closes the previous mysql record with an exit code and finish time
-	# $1 should be exit code
-	endTime=`date '+%Y-%m-%d %H:%M:%S %Z'`
-	myQry="update connections set endTime='$endTime',exitStatus='$1' where id='$auditID'"
-	$myCmd "$myQry"
 }
 
 # no command equals no access, punk

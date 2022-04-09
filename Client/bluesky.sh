@@ -29,21 +29,6 @@ if [ -e "$ourHome/.debug" ]; then
   set -x
 fi
 
-function logMe {
-# gets message from first argument attaches date stamp and puts it in our log file
-# if debug flag is present, echo the log message to stdout
-  logMsg="$1"
-  logFile="$ourHome/activity.txt"
-  if [ ! -e "$logFile" ]; then
-    touch "$logFile"
-  fi
-  dateStamp=`date '+%Y-%m-%d %H:%M:%S'`
-  echo "$dateStamp - v$bVer - $logMsg" >> "$logFile"
-  if [ -e "$ourHome/.debug" ]; then
-    echo "$logMsg"
-  fi
-}
-
 function getAutoPid {
   autoPid=`head -n 1 "$ourHome/autossh.pid"`
   if [ "$autoPid" != "" ]; then
@@ -88,81 +73,19 @@ function killShells {
   fi
 }
 
-function rollLog {
-  logName="$1"
-  if [ -e "$ourHome/$logName" ];then
-    rollCount=5
-    rm -f "$ourHome/$logName.$rollCount" &> /dev/null
-    while [ $rollCount -gt 0 ]; do
-      let prevCount=rollCount-1
-      if [ -e "$ourHome/$logName.$prevCount" ]; then
-        mv "$ourHome/$logName.$prevCount" "$ourHome/$logName.$rollCount"
-      fi
-      if [ $prevCount -eq 0 ]; then
-        mv "$ourHome/$logName" "$ourHome/$logName.$rollCount"
-      fi
-      rollCount=$prevCount
-    done
-    timeStamp=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "Log file created at $timeStamp" > "$ourHome/$logName"
+function logMe {
+# gets message from first argument attaches date stamp and puts it in our log file
+# if debug flag is present, echo the log message to stdout
+  logMsg="$1"
+  logFile="$ourHome/activity.txt"
+  if [ ! -e "$logFile" ]; then
+    touch "$logFile"
   fi
-}
-
-function startMeUp {
-  export AUTOSSH_PIDFILE="$ourHome/autossh.pid"
-  export AUTOSSH_LOGFILE="$ourHome/autossh.log"
-  #rollLog autossh.log
-  timeStamp=`date "+%Y-%m-%d %H:%M:%S"`
-  echo "$timeStamp BlueSky starting AutoSSH"
-  # check for alternate SSH port
-  altPort=`/usr/libexec/PlistBuddy -c "Print :altport" "$ourHome/settings.plist"  2> /dev/null`
-  if [ "$altPort" == "" ]; then
-    altPort=22
-  else
-    logMe "SSH port is set to $altPort per settings"
+  dateStamp=`date '+%Y-%m-%d %H:%M:%S'`
+  echo "$dateStamp - v$bVer - $logMsg" >> "$logFile"
+  if [ -e "$ourHome/.debug" ]; then
+    echo "$logMsg"
   fi
-  # is this 10.6 which doesn't support UseRoaming or 10.12+ which doesn't need the flag?
-  if [ ${osVersionMajor:-0} -eq 10 ] && [ "$osVersionMinor" != "6" ] && [ ${osVersionMinor:-0} -lt 12 ]; then
-    noRoam="-o UseRoaming=no"
-  fi
-  ## main command right here
-  $ourHome/autossh -M $monport -f \
-  -c $prefCipher -m $msgAuth \
-  $kexAlg \
-  -o HostKeyAlgorithms=$keyAlg \
-  -nNT -R $sshport:127.0.0.1:$altPort -R $vncport:127.0.0.1:5900 -p 3122 \
-  $noRoam \
-  -i "$ourHome/.ssh/bluesky_client" bluesky@$blueskyServer
-  #echo "$!" > "$ourHome/autossh.pid"
-  # are we live?
-  sleep 5
-  while [ ${autoTimer:-0} -lt 35 ]; do
-	sshProc=`ps -ax | grep ssh | grep 'bluesky\@'`
-	if [ "$sshProc" != "" ]; then
-		break
-	fi
-	sleep 1
-	(( autoTimer++ ))
-  done
-  # looks like it started up, lets check
-  getAutoPid
-  if [ "$autoPid" == "" ]; then
-    logMe "ERROR - autossh wont start, check logs. Exiting."
-    exit 1
-  else
-  	sshProc=`ps -ax | grep ssh | grep 'bluesky\@'`
-  	if [ "$sshProc" != "" ]; then
-	  logMe "autossh started successfully"
-	else
-	  logMe "ERROR - autossh is running but no tunnel, check logs. Exiting."
-	  exit 1
-	fi
-  fi
-}
-
-function restartConnection {
-  killShells
-  startMeUp
 }
 
 function reKey {
@@ -218,6 +141,31 @@ function reKey {
   /usr/libexec/PlistBuddy -c "Set :keytime `date +%s`" "$ourHome/settings.plist"
 }
 
+function restartConnection {
+  killShells
+  startMeUp
+}
+
+function rollLog {
+  logName="$1"
+  if [ -e "$ourHome/$logName" ];then
+    rollCount=5
+    rm -f "$ourHome/$logName.$rollCount" &> /dev/null
+    while [ $rollCount -gt 0 ]; do
+      let prevCount=rollCount-1
+      if [ -e "$ourHome/$logName.$prevCount" ]; then
+        mv "$ourHome/$logName.$prevCount" "$ourHome/$logName.$rollCount"
+      fi
+      if [ $prevCount -eq 0 ]; then
+        mv "$ourHome/$logName" "$ourHome/$logName.$rollCount"
+      fi
+      rollCount=$prevCount
+    done
+    timeStamp=`date "+%Y-%m-%d %H:%M:%S"`
+    echo "Log file created at $timeStamp" > "$ourHome/$logName"
+  fi
+}
+
 function serialMonster {
 # reads serial number in settings and checks it against hardware - helpful if we are cloned or blank logic board
 # sets serialNum for rest of script
@@ -256,6 +204,58 @@ else
     #do any other first run steps here
   fi
 fi
+}
+
+function startMeUp {
+  export AUTOSSH_PIDFILE="$ourHome/autossh.pid"
+  export AUTOSSH_LOGFILE="$ourHome/autossh.log"
+  #rollLog autossh.log
+  timeStamp=`date "+%Y-%m-%d %H:%M:%S"`
+  echo "$timeStamp BlueSky starting AutoSSH"
+  # check for alternate SSH port
+  altPort=`/usr/libexec/PlistBuddy -c "Print :altport" "$ourHome/settings.plist"  2> /dev/null`
+  if [ "$altPort" == "" ]; then
+    altPort=22
+  else
+    logMe "SSH port is set to $altPort per settings"
+  fi
+  # is this 10.6 which doesn't support UseRoaming or 10.12+ which doesn't need the flag?
+  if [ ${osVersionMajor:-0} -eq 10 ] && [ "$osVersionMinor" != "6" ] && [ ${osVersionMinor:-0} -lt 12 ]; then
+    noRoam="-o UseRoaming=no"
+  fi
+  ## main command right here
+  $ourHome/autossh -M $monport -f \
+  -c $prefCipher -m $msgAuth \
+  $kexAlg \
+  -o HostKeyAlgorithms=$keyAlg \
+  -nNT -R $sshport:127.0.0.1:$altPort -R $vncport:127.0.0.1:5900 -p 3122 \
+  $noRoam \
+  -i "$ourHome/.ssh/bluesky_client" bluesky@$blueskyServer
+  #echo "$!" > "$ourHome/autossh.pid"
+  # are we live?
+  sleep 5
+  while [ ${autoTimer:-0} -lt 35 ]; do
+	sshProc=`ps -ax | grep ssh | grep 'bluesky\@'`
+	if [ "$sshProc" != "" ]; then
+		break
+	fi
+	sleep 1
+	(( autoTimer++ ))
+  done
+  # looks like it started up, lets check
+  getAutoPid
+  if [ "$autoPid" == "" ]; then
+    logMe "ERROR - autossh wont start, check logs. Exiting."
+    exit 1
+  else
+  	sshProc=`ps -ax | grep ssh | grep 'bluesky\@'`
+  	if [ "$sshProc" != "" ]; then
+	  logMe "autossh started successfully"
+	else
+	  logMe "ERROR - autossh is running but no tunnel, check logs. Exiting."
+	  exit 1
+	fi
+  fi
 }
 
 # make me a sandwich? make it yourself

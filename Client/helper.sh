@@ -25,6 +25,15 @@ if [ -e "$ourHome/.debug" ]; then
   set -x
 fi
 
+function killShells {
+    kill -9 `ps -ax | grep "$ourHome/autossh" | grep -v grep | awk '{ print $1 }'`
+    shellList=`ps -ax | grep ssh | grep 'bluesky\@' | awk '{ print $1 }'`
+    for shellPid in $shellList; do
+        kill -9 $shellPid
+        logMe "Killed stale shell on $shellPid"
+    done
+}
+
 function logMe {
   logMsg="$1"
   logFile="$ourHome/activity.txt"
@@ -36,15 +45,6 @@ function logMe {
   if [ -e "$ourHome/.debug" ]; then
     echo "$logMsg"
   fi
-}
-
-function killShells {
-    kill -9 `ps -ax | grep "$ourHome/autossh" | grep -v grep | awk '{ print $1 }'`
-    shellList=`ps -ax | grep ssh | grep 'bluesky\@' | awk '{ print $1 }'`
-    for shellPid in $shellList; do
-        kill -9 $shellPid
-        logMe "Killed stale shell on $shellPid"
-    done
 }
 
 #if server.plist is not present, error and exit
