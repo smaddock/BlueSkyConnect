@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # BlueSkyConnect macOS SSH tunnel
 # See https://github.com/BlueSkyTools/BlueSkyConnect

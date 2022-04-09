@@ -11,7 +11,7 @@
 myCmd="/usr/bin/mysql --defaults-file=/var/local/my.cnf --default-character-set=utf8 BlueSky -N -B -e"
 
 # grab things necessary for all phases
-keyUsed="TBD" 
+keyUsed="TBD"
 startTime=`date '+%Y-%m-%d %H:%M:%S %Z'`
 sourceIP=`tail /var/log/auth.log | grep 'for admin' | tail -n 1 | awk -F 'for admin from ' '{ print $2 }' | awk '{ print $1 }'`
 
