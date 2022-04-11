@@ -1,22 +1,11 @@
 #!/bin/bash
 
-# c)2011-2014 Best Macs, Inc.
-# c)2014-2015 Mac-MSP LLC
-# Copyright 2016-2017 SolarWinds Worldwide, LLC
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-
-#       http://www.apache.org/licenses/LICENSE-2.0
-
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-
+# BlueSkyConnect macOS SSH tunnel
+#
 # helper script performs privileged tasks for BlueSky, does initial client setup
+#
+# See https://github.com/BlueSkyTools/BlueSkyConnect
+# Licensed under the Apache License, Version 2.0
 
 ourHome="/var/bluesky"
 bVer="2.3.2"
@@ -24,6 +13,15 @@ bVer="2.3.2"
 if [ -e "$ourHome/.debug" ]; then
   set -x
 fi
+
+function killShells {
+    kill -9 `ps -ax | grep "$ourHome/autossh" | grep -v grep | awk '{ print $1 }'`
+    shellList=`ps -ax | grep ssh | grep 'bluesky\@' | awk '{ print $1 }'`
+    for shellPid in $shellList; do
+        kill -9 $shellPid
+        logMe "Killed stale shell on $shellPid"
+    done
+}
 
 function logMe {
   logMsg="$1"
@@ -36,15 +34,6 @@ function logMe {
   if [ -e "$ourHome/.debug" ]; then
     echo "$logMsg"
   fi
-}
-
-function killShells {
-    kill -9 `ps -ax | grep "$ourHome/autossh" | grep -v grep | awk '{ print $1 }'`
-    shellList=`ps -ax | grep ssh | grep 'bluesky\@' | awk '{ print $1 }'`
-    for shellPid in $shellList; do
-        kill -9 $shellPid
-        logMe "Killed stale shell on $shellPid"
-    done
 }
 
 #if server.plist is not present, error and exit
