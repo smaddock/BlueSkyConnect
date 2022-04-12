@@ -170,6 +170,18 @@ elif [ "$setCheck" != "$bVer" ]; then
   /usr/libexec/PlistBuddy -c "Set :version $bVer" "$ourHome/settings.plist"
 fi
 
+#ensure openssl path links for older OS/our curl.
+if [ ${osVersionMajor:-10} -eq 10 ] && [ ${osVersionMinor} -lt 14 ]; then
+  if [ ! -e "/usr/local/opt/openssl@1.1" ]; then
+    mkdir -p "/usr/local/opt"
+    ln -s "$ourHome/openssl" "/usr/local/opt/openssl@1.1"
+  fi
+  if [ ! -e "/usr/local/Cellar/openssl@1.1/1.1.1n" ]; then
+    mkdir -p "/usr/local/Cellar/openssl@1.1"
+    ln -s "$ourHome/openssl" "/usr/local/Cellar/openssl@1.1/1.1.1n"
+  fi
+fi
+
 #make sure we stay executable - helps with initial install if someone isn't packaging
 chmod a+x /var/bluesky/helper.sh /var/bluesky/bluesky.sh /var/bluesky/autossh /var/bluesky/corkscrew /var/bluesky/proxy-config /var/bluesky/.ssh/wrapper.sh
 
