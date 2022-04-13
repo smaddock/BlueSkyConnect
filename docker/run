@@ -6,41 +6,35 @@
 
 # set mysql admin password
 if [[ $MYSQLROOTPASS ]]; then
-  mysqlRootPass=$MYSQLROOTPASS
+  MYSQL_ROOT_PASS=$MYSQLROOTPASS
+elif [[ $DB_ENV_MYSQL_ROOT_PASSWORD ]]; then
+  # let’s check for the linked container’s password
+  MYSQL_ROOT_PASS=$DB_ENV_MYSQL_ROOT_PASSWORD
 else
-	# lets check for the linked containers password
-	if [[ $DB_ENV_MYSQL_ROOT_PASSWORD ]]; then
-		mysqlRootPass=$DB_ENV_MYSQL_ROOT_PASSWORD
-	else
-		mysqlRootPass="admin"
-	fi
+  MYSQL_ROOT_PASS="admin"
 fi
 
 # wait for database
 COUNT=0
-while [ $COUNT -le 30 ]
-do
-	sleep 1;
-	COUNT=$((COUNT+1));
-
-  MYSQL_IS_RUNNING=$(mysqladmin -h db -u root -p'$mysqlRootPass' status 2>1 /dev/null | grep Uptime)
-
-  if [[ -z $MYSQL_IS_RUNNING ]]; then
-    if [ $COUNT -gt 60 ]; then
-      echo "We failed to connect to the database, exiting..."
-      exit 1;
+while [[ $COUNT -le 30 ]]; do
+  sleep 1
+  ((COUNT++))
+  if ! mysqladmin -h db -u root -p "$MYSQL_ROOT_PASS" status 2> /dev/null | grep -q Uptime; then
+    if [[ $COUNT -gt 60 ]]; then
+      echo "We failed to connect to the database. Exiting..."
+      exit 1
     fi
-    echo "Waiting for the database to start.  Attempt $COUNT..."
+    echo "Waiting for the database to start. Attempt $COUNT..."
   else
     echo "Database is running..."
     break
   fi
 done
 
-# run bluesky server config
+# run BlueSky server config
 /usr/local/bin/BlueSkyConnect/Server/server-config.sh
 
-# purge hanging sockets/pids
+# purge hanging sockets/PIDs
 rm -f /var/run/fail2ban/*
 
 # create and set perms for www/.ssh
@@ -51,18 +45,18 @@ chown www-data /var/www/.ssh
 chmod +r /certs/blueskyadmin.key
 chmod +r /certs/blueskyclient.key
 
-# set default bluesky user
-if [[ ! -z $DEFAULT_USER ]]; then
-	echo "$DEFAULT_USER" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
+# set default BlueSky user
+if [[ $DEFAULT_USER ]]; then
+  echo "$DEFAULT_USER" > /usr/local/bin/BlueSkyConnect/Server/defaultLogin.txt
 fi
 
-# migrate ssh wrapper path for existing keys
-if [ ! -e /home/admin/.ssh/.authorized_keys_migrated ]; then
-  sed -i "s/bin\/BlueSky\/Server/bin\/BlueSkyConnect\/Server/g" /home/admin/.ssh/authorized_keys
+# migrate SSH wrapper path for existing keys
+if [[ ! -e /home/admin/.ssh/.authorized_keys_migrated ]]; then
+  sed -i "s|bin/BlueSky/Server|bin/BlueSkyConnect/Server|g" /home/admin/.ssh/authorized_keys
   touch /home/admin/.ssh/.authorized_keys_migrated
 fi
-if [ ! -e /home/bluesky/.ssh/.authorized_keys_migrated ]; then
-  sed -i "s/bin\/BlueSky\/Server/bin\/BlueSkyConnect\/Server/g" /home/bluesky/.ssh/authorized_keys
+if [[ ! -e /home/bluesky/.ssh/.authorized_keys_migrated ]]; then
+  sed -i "s|bin/BlueSky/Server|bin/BlueSkyConnect/Server|g" /home/bluesky/.ssh/authorized_keys
   touch /home/bluesky/.ssh/.authorized_keys_migrated
 fi
 

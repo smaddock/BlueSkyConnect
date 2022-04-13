@@ -7,39 +7,38 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-tmpFile="$1"
+TMP_FILE="$1"
 
-fileLoc=`ls /home/admin/newkeys/$1 2>/dev/null`
+FILE_LOC=$(ls "/home/admin/newkeys/$1" 2> /dev/null)
 
-if [ "$fileLoc" != "" ]; then
-	targetLoc="admin"
-	prefixCode="command=\"/usr/local/bin/BlueSkyConnect/Server/$targetLoc-wrapper.sh\""
+if [[ $FILE_LOC ]]; then
+  TARGET_LOC="admin"
+  PREFIX_CODE="command=\"/usr/local/bin/BlueSkyConnect/Server/$TARGET_LOC-wrapper.sh\""
 else
-	targetLoc="bluesky"
-	prefixCode="command=\"/usr/local/bin/BlueSkyConnect/Server/$targetLoc-wrapper.sh\",no-X11-forwarding,no-agent-forwarding,no-pty"
+  TARGET_LOC="bluesky"
+  PREFIX_CODE="command=\"/usr/local/bin/BlueSkyConnect/Server/$TARGET_LOC-wrapper.sh\",no-X11-forwarding,no-agent-forwarding,no-pty"
 fi
 
-pubKey=`cat "/home/$targetLoc/newkeys/$tmpFile"`
-serialNum=`echo "$pubKey" | awk '{ print $NF }'`
+PUB_KEY=$(< "/home/$TARGET_LOC/newkeys/$TMP_FILE")
+SERIAL_NUM=$(awk '{ print $NF }' <<< "$PUB_KEY")
 # 256 SHA256:Sahm5Rft8nvUQ5425YgrrSNGosZA4hf/P2NmhRr2NL0 uploaded@1510761187 sysadmin@Sidekick.local (ECDSA)
-fingerPrint=`ssh-keygen -l -f /home/$targetLoc/newkeys/$tmpFile | awk '{ print $2 }' | cut -d : -f 2`
+# FINGER_PRINT=$(ssh-keygen -l -f /home/$TARGET_LOC/newkeys/$TMP_FILE | awk '{ print $2 }' | cut -d : -f 2)
 
-#remove previous keys with same serial
-if [ "$serialNum" != "" ]; then
-	sed -i "/$serialNum/d" /home/$targetLoc/.ssh/authorized_keys
+# remove previous keys with same serial
+if [[ $SERIAL_NUM ]]; then
+  sed -i "/$SERIAL_NUM/d" /home/$TARGET_LOC/.ssh/authorized_keys
 fi
 # install it
-echo "$prefixCode $pubKey" >> /home/$targetLoc/.ssh/authorized_keys
+echo "$PREFIX_CODE $PUB_KEY" >> /home/$TARGET_LOC/.ssh/authorized_keys
 
-rm -f "/home/$targetLoc/newkeys/$tmpFile"
+rm -f "/home/$TARGET_LOC/newkeys/$TMP_FILE"
 
 # add to admin keys table
-if [ "$targetLoc" == "admin" ]; then
-	adminKeys=`cat /home/admin/.ssh/authorized_keys | awk '{ print $NF }'`
-	myCmd="/usr/bin/mysql --defaults-file=/var/local/my.cnf BlueSky -N -B -e"
-	myQry="update global set adminkeys='$adminKeys'"
-	$myCmd "$myQry"
+if [[ $TARGET_LOC = "admin" ]]; then
+  ADMIN_KEYS=$(awk '{ print $NF }' /home/admin/.ssh/authorized_keys)
+  MY_CMD="/usr/bin/mysql --defaults-file=/var/local/my.cnf BlueSky -N -B -e"
+  MY_QRY="UPDATE global SET adminkeys = '$ADMIN_KEYS';"
+  $MY_CMD "$MY_QRY"
 fi
-
 
 exit 0

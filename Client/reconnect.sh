@@ -7,26 +7,26 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-ourHome="/var/bluesky"
+OUR_HOME="/var/bluesky"
 
-if [ -e "$ourHome/.debug" ]; then
+if [[ -f "$OUR_HOME/.debug" ]]; then
   set -x
 fi
 
-function logMe {
-  logMsg="$1"
-  logFile="$ourHome/reconnect.txt"
-  if [ ! -e "$logFile" ]; then
-    touch "$logFile"
+logMe() {
+  LOG_MSG="$1"
+  LOG_FILE="$OUR_HOME/reconnect.txt"
+  if [[ ! -e $LOG_FILE ]]; then
+    touch "$LOG_FILE"
   fi
-  dateStamp=`date '+%Y-%m-%d %H:%M:%S'`
-  echo "$dateStamp - $logMsg" >> "$logFile"
-  if [ -e "$ourHome/.debug" ]; then
-    echo "$logMsg"
+  DATE_STAMP=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "$DATE_STAMP - $LOG_MSG" >> "$LOG_FILE"
+  if [[ -f "$OUR_HOME/.debug" ]]; then
+    echo "$LOG_MSG"
   fi
 }
 
-if [ "$1" == "wake" ]; then
+if [[ $1 = "wake" ]]; then
   logMe "System wake detected, Reloading bluesky service..."
 else
   logMe "Network state change detected, Reloading bluesky service..."

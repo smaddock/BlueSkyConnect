@@ -8,44 +8,50 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-usage () {
-	echo 'Usage: proxy-config [-h] [-s]
-	-h:	 HTTP Proxy Settings
-	-s:	 HTTPS Proxy Settings'
-	exit 255
+usage() {
+  cat << EOM
+Usage: proxy-config [-h] [-s]
+-h: HTTP Proxy Settings
+-s: HTTPS Proxy Settings
+EOM
+  exit 255
 }
 
-# get proxy info from system preferences
+# get proxy info from System Preferences
 # Detect active network service for active route
-routeServiceGUID=$(printf "open\nget State:/Network/Global/IPv4\nd.show" | scutil | grep "PrimaryService" | awk '{print $3}')
-routeServiceName=$(printf "open\nget Setup:/Network/Service/$routeServiceGUID\nd.show" | scutil | grep "UserDefinedName" | awk -F': ' '{print $2}')
+ROUTE_SERVICE_GUID=$(scutil <<< "show State:/Network/Global/IPv4" | awk -F " : " '/PrimaryService/ {print $2}')
+ROUTE_SERVICE_NAME=$(scutil <<< "show Setup:/Network/Service/$ROUTE_SERVICE_GUID" | awk -F " : " '/UserDefinedName/ {print $2}')
 
-## Arg parsing, for http or https settings
-arg="$1"
-case "$arg" in
-	-h)
-		networkSetupType='getwebproxy'
-		;;
-	-s)
-		networkSetupType='getsecurewebproxy'
-		;;
-	*)
-		usage
-		;;
-esac
+# Arg parsing, for HTTP or HTTPS settings
+while getopts ":hs" OPT; do
+  case $OPT in
+    h)
+      NETWORK_SETUP_TYPE="getwebproxy"
+      ;;
+    s)
+      NETWORK_SETUP_TYPE="getsecurewebproxy"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG"
+      usage
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
 
-
-# Get details on proxy settings. This can take some time so lets only ask the system once.
-proxyDetails=$(networksetup -"$networkSetupType" "$routeServiceName")
+# Get details on proxy settings. This can take some time so let’s only ask the system once.
+PROXY_DETAILS=$(networksetup "-$NETWORK_SETUP_TYPE" "$ROUTE_SERVICE_NAME")
 # Are the proxy settings enabled?
-if [[ $(echo "$proxyDetails" | grep ^'Enabled: Yes') ]]; then
-	# It is enabled, lets read the data
-	proxyHostName=$(echo "$proxyDetails" | grep ^'Server:' | awk -F ': ' '{print $NF}')
-	proxyPort=$(echo "$proxyDetails" | grep ^'Port:' | awk -F ': ' '{print $NF}')
-	# sanity check, did we get those? A blank field for port in the GUI gives us an output string of "0", which is equally bad as null
-	if [[ -n $proxyHostName ]] && [[ -n $proxyPort ]] && [[ $proxyPort -ne 0 ]]; then
-		echo "http://$proxyHostName:$proxyPort"
-	fi
+if grep -q ^"Enabled: Yes" <<< "$PROXY_DETAILS"; then
+  # It is enabled, let’s read the data
+  PROXY_HOST_NAME=$(awk -F ": " '/^Server:/ {print $NF}' <<< "$PROXY_DETAILS")
+  PROXY_PORT=$(awk -F ": " '/^Port:/ {print $NF}' <<< "$PROXY_DETAILS")
+  # sanity check, did we get those? A blank field for port in the GUI gives us an output string of "0", which is equally bad as null
+  if [[ $PROXY_HOST_NAME ]] && [[ $PROXY_PORT ]] && [[ $PROXY_PORT -ne 0 ]]; then
+    echo "http://$PROXY_HOST_NAME:$PROXY_PORT" # should this be https if [[ $NETWORK_SETUP_TYPE = "getsecurewebproxy" ]] ?
+  fi
 fi
 
 exit 0

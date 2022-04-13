@@ -8,6 +8,6 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-ip2ban="$1"
-#TODO - do some validation on the input
-ufw insert 1 deny from $ip2ban to any
+IP_TO_BAN="$1"
+# TODO - do some validation on the input
+ufw insert 1 deny from "$IP_TO_BAN" to any

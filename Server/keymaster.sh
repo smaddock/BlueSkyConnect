@@ -8,39 +8,35 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-dataUp="$1"
-tmpName=`uuidgen`
+DATA_UP="$1"
+TMP_NAME=$(uuidgen)
 
-# decrypt. if admin fails, try client. if both fail, reject it.  Whichever one passes, note the type.
-echo "$dataUp" | openssl smime -decrypt -inform PEM -inkey /usr/local/bin/BlueSkyConnect/Server/blueskyclient.key -out /tmp/$tmpName.pub
-if [ $? -ne 0 ]; then
-	echo "$dataUp" | openssl smime -decrypt -inform PEM -inkey /usr/local/bin/BlueSkyConnect/Server/blueskyadmin.key -out /tmp/$tmpName.pub
-	if [ $? -ne 0 ]; then
-		echo "Invalid"
-		exit 0
-	else
-		targetLoc="admin"
-	fi
+# Attempt to decrypt the client and admin keys. Whichever one passes, note the type. If both fail, reject it.
+if openssl smime -decrypt -inform PEM -inkey /usr/local/bin/BlueSkyConnect/Server/blueskyclient.key -out "/tmp/$TMP_NAME.pub" <<< "$DATA_UP"; then
+  TARGET_LOC="bluesky"
+elif openssl smime -decrypt -inform PEM -inkey /usr/local/bin/BlueSkyConnect/Server/blueskyadmin.key -out "/tmp/$TMP_NAME.pub" <<< "$DATA_UP"; then
+  TARGET_LOC="admin"
 else
-	targetLoc="bluesky"
+  echo "Invalid"
+  exit 0 # should this be a non-zero exit code?
 fi
 
-pubKey=`cat /tmp/$tmpName.pub`
-
-keyValid=`ssh-keygen -l -f /tmp/$tmpName.pub`
-# keyValid contains the hash that will appear in auth.log
+KEY_VALID=$(ssh-keygen -l -f "/tmp/$TMP_NAME.pub")
+# $KEY_VALID contains the hash that will appear in auth.log
 # 256 SHA256:Sahm5Rft8nvUQ5425YgrrSNGosZA4hf/P2NmhRr2NL0 uploaded@1510761187 sysadmin@Sidekick.local (ECDSA)
-fingerPrint=`echo "$keyValid" | awk '{ print $2 }' | cut -d : -f 2`
-if [[ "$keyValid" == *"ED25519"* ]] || [[ "$keyValid" == *"RSA"* ]]; then
-  mv /tmp/$tmpName.pub /home/$targetLoc/newkeys/$tmpName.pub
+# FINGER_PRINT=$(awk '{ print $2 }' <<< "$KEY_VALID" | cut -d : -f 2)
+if [[ $KEY_VALID = *"ED25519"* ]] || [[ $KEY_VALID = *"RSA"* ]]; then
+  mv "/tmp/$TMP_NAME.pub" "/home/$TARGET_LOC/newkeys/$TMP_NAME.pub"
   echo "Installed"
-  if [ "$targetLoc" == "admin" ] && [ -e /usr/local/bin/BlueSkyConnect/Server/emailHelper.sh ]; then
-    #email the subscriber about it
-    keyID=`echo "$pubKey" | awk '{ print $NF }'`
-    /usr/local/bin/BlueSkyConnect/Server/emailHelper.sh "BlueSky Admin Key Registered" "A new admin key with identifier $keyID was registered in your server. If you did not expect this, please invoke Emergency Stop."
+  if [[ $TARGET_LOC = "admin" ]] && [[ -x /usr/local/bin/BlueSkyConnect/Server/emailHelper.sh ]]; then
+    # email the subscriber about it
+    KEY_ID=$(awk '{ print $NF }' "/tmp/$TMP_NAME.pub")
+    /usr/local/bin/BlueSkyConnect/Server/emailHelper.sh \
+      "BlueSky Admin Key Registered" \
+      "A new admin key with identifier $KEY_ID was registered in your server. If you did not expect this, please invoke Emergency Stop."
   fi
 else
-#  rm -f /tmp/$tmpName.pub
+  # rm -f /tmp/$TMP_NAME.pub
   echo "Invalid"
 fi
 

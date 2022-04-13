@@ -8,5 +8,5 @@
 # See https://github.com/BlueSkyTools/BlueSkyConnect
 # Licensed under the Apache License, Version 2.0
 
-echo "shell access is not permitted for BlueSky"
+echo "Remote shell access is not permitted for BlueSky."
 exit 127
